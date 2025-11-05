@@ -1,22 +1,7 @@
-pluginManagement {
-    repositories {
-        mavenLocal()
-        gradlePluginPortal()
-        maven {
-            name = 'MinecraftForge'
-            url = 'https://maven.minecraftforge.net/'
-        }
-        maven {
-            name = 'NeoForge'
-            url = 'https://maven.neoforged.net/releases'
-        }
-    }
-}
-
 plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.0'
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
 }
-
-
-//rootProject.buildFileName = 'build.forge.gradle'
-rootProject.buildFileName = 'build.neoforge.gradle'
+rootProject.name = "quick_copy_item_id"
+include 'common'
+include '1.21-neoforge'
+//include '1.19.2-forge'

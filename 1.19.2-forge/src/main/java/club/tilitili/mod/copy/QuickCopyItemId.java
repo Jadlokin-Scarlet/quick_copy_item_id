@@ -1,5 +1,6 @@
 package club.tilitili.mod.copy;
 
+import club.tilitili.mod.copy.common.QuickCopyItemIdCommon;
 import club.tilitili.mod.copy.mixin.AbstractContainerScreenAccessor;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.logging.LogUtils;
@@ -19,21 +20,17 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
-// The value here should match an entry in the META-INF/mods.toml file
-@Mod(QuickCopyItemId.MODID)
-public class QuickCopyItemId
-{
-    // Define mod id in a common place for everything to reference
-    public static final String MODID = "quick_copy_item_id";
-    // Directly reference a slf4j logger
+@Mod(QuickCopyItemIdCommon.MOD_ID)
+public class QuickCopyItemId {
     private static final Logger LOGGER = LogUtils.getLogger();
-
+    private final QuickCopyItemIdCommon quickCopyItemIdCommon;
+    private final GameImpl gameImpl;
     private Screen cacheScreen = null;
 
     public QuickCopyItemId() {
-        // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
-
+        gameImpl = new GameImpl();
+        quickCopyItemIdCommon = new QuickCopyItemIdCommon(gameImpl);
     }
 
     @SubscribeEvent
@@ -41,41 +38,40 @@ public class QuickCopyItemId
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null) {
-            LOGGER.warn("player is null!");
+            LOGGER.debug("player is null!");
             return;
         }
+        gameImpl.setPlayer(player);
         if (cacheScreen != event.getScreen()) {
             cacheScreen = event.getScreen();
         }
         if (!(cacheScreen instanceof AbstractContainerScreen)) {
-            LOGGER.warn("Copied error");
+            LOGGER.debug("Copied error");
             return;
         }
         boolean shiftIsDown = InputConstants.isKeyDown(mc.getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)
                 || InputConstants.isKeyDown(mc.getWindow().getWindow(), GLFW.GLFW_KEY_RIGHT_SHIFT);
-        if (!shiftIsDown) {
-            LOGGER.warn("no shift");
-            return;
-        }
+//        if (!shiftIsDown) {
+//            LOGGER.debug("no shift");
+//            return;
+//        }
 
         Slot selectedSlot = ((AbstractContainerScreenAccessor) cacheScreen).quickcopyitemid$invokeFindSlot(event.getMouseX(), event.getMouseY());
         if (selectedSlot == null) {
-            LOGGER.warn("no item");
+            LOGGER.debug("no item");
             return;
         }
         ItemStack selectedSlotStack = selectedSlot.getItem();
         if (selectedSlotStack.isEmpty()) {
-            LOGGER.warn("Copied error2");
+            LOGGER.debug("Copied error2");
             return;
         }
         ResourceLocation resourceLocation = ForgeRegistries.ITEMS.getKey(selectedSlotStack.getItem());
         if (resourceLocation == null) {
-            LOGGER.warn("no fond item");
+            LOGGER.debug("no fond item");
             return;
         }
         String itemId = resourceLocation.toString();
-        mc.keyboardHandler.setClipboard(itemId);
-        player.displayClientMessage(Component.literal("Copied Item ID: " + itemId), true);
-//        Main.onMouseScrolled(event.getScreen(), event.getMouseX(), event.getMouseY(), event.getDeltaY());
+        quickCopyItemIdCommon.onClickItem(itemId, shiftIsDown);
     }
 }

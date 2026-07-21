@@ -15,6 +15,6 @@ public class QuickCopyItemIdCommon {
 //            return;
 //        }
         gameImp.setClipboard(itemId);
-        gameImp.displayClientMessage("Copied Item ID: " + itemId);
+//        gameImp.displayClientMessage("Copied Item ID: " + itemId);
     }
 }
